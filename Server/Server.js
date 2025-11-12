@@ -6,6 +6,7 @@ const userRouter = require("./Routes/User")
 const Product = require("./Models/Product")
 const app = express()
 const ConnectToDataBase = require("./Connect")
+const productRouter = require("./Routes/Product")
 const DATABASE_URL = process.env.DATABASE_URL;
 
 ConnectToDataBase(DATABASE_URL)
@@ -21,6 +22,7 @@ app.get('/' , (req , res)=>{
 })
 
 app.use('/user',userRouter)
+app.use('/product',productRouter)
 
 
 
