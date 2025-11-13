@@ -99,6 +99,29 @@ const signupController = async (req, res) => {
   }
 };
 
-module.exports = { signupController,loginController };
+const getProductsByUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const products = await Product.find({ Seller: userId })
+      .sort({ createdAt: -1 })
+      .populate("Seller", "userName email");
+
+    res.status(200).json({
+      msg: "User's products fetched successfully!",
+      total: products.length,
+      products,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      msg: "Error fetching user's products",
+      error: error.message,
+    });
+  }
+};
+
+
+module.exports = { signupController,loginController,getProductsByUser };
 
 
