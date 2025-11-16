@@ -5,9 +5,18 @@ const User = require("./Models/User")
 const userRouter = require("./Routes/User")
 const Product = require("./Models/Product")
 const app = express()
+const http = require("http");
+const server = http.createServer(app);
+const { Server } = require("socket.io");
 const ConnectToDataBase = require("./Connect")
 const productRouter = require("./Routes/Product")
 const DATABASE_URL = process.env.DATABASE_URL;
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+    }
+});
+
 
 ConnectToDataBase(DATABASE_URL)
 .then(()=> console.log("Connected to database!!"))
@@ -27,7 +36,5 @@ app.use('/product',productRouter)
 
 
 
-
-
 const PORT = process.env.PORT
-app.listen(PORT,()=>console.log(`Server running on port ${PORT} sucessfully`))
+server.listen(PORT,()=>console.log(`Server running on port ${PORT} sucessfully`))
