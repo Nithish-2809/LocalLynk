@@ -36,5 +36,52 @@ app.use('/product',productRouter)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+const onlineUsers = new Map(); 
+
+io.on("connection", (socket)=> {
+    console.log("User connected:", socket.id);
+
+    
+    socket.on("addUser", (userId) => {
+        onlineUsers.set(userId, socket.id);
+        console.log("User added:", userId, "->", socket.id);
+    })
+
+    socket.on("sendMessage",({senderId,receiverId,message})=> {
+        const receiverSocketId = onlineUsers.get(receiverId)
+
+        if(receiverSocketId) {
+            io.to(receiverSocketId).emit("receiveMessage",{senderId,message,createdAt: new Date().toISOString()})
+        }
+
+        socket.emit("messageSent",{receiverId,message,createdAt: new Date().toISOString()})
+    })
+
+    socket.on("disconnect",() => {
+        console.log("User disconnected",socket.id)
+
+        for(let [uId,sId] of onlineUsers.entries()) {
+            if(socket.id==sId) {
+                onlineUsers.delete(uId)
+                break
+            }
+        }
+    
+    })
+
+})
+
+
 const PORT = process.env.PORT
 server.listen(PORT,()=>console.log(`Server running on port ${PORT} sucessfully`))
