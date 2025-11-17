@@ -70,7 +70,7 @@ const getAllProducts = async (req, res) => {
 
 
 const getProductById = async (req, res) => {
-
+  const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ msg: "Invalid product id" });
     }

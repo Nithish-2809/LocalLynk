@@ -10,6 +10,7 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const ConnectToDataBase = require("./Connect")
 const productRouter = require("./Routes/Product")
+const messageRouter = require("./Routes/Message")
 const DATABASE_URL = process.env.DATABASE_URL;
 const io = new Server(server, {
     cors: {
@@ -34,19 +35,6 @@ app.use('/user',userRouter)
 app.use('/product',productRouter)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 const onlineUsers = new Map(); 
 
 io.on("connection", (socket)=> {
@@ -58,15 +46,27 @@ io.on("connection", (socket)=> {
         console.log("User added:", userId, "->", socket.id);
     })
 
-    socket.on("sendMessage",({senderId,receiverId,message})=> {
-        const receiverSocketId = onlineUsers.get(receiverId)
+    socket.on("sendMessage", ({ senderId, receiverId, message, productId }) => {
+    
+    const receiverSocketId = onlineUsers.get(receiverId);
 
-        if(receiverSocketId) {
-            io.to(receiverSocketId).emit("receiveMessage",{senderId,message,createdAt: new Date().toISOString()})
-        }
+    if (receiverSocketId) {
+        io.to(receiverSocketId).emit("receiveMessage", {
+            senderId,
+            message,
+            productId,
+            createdAt: new Date().toISOString()
+        });
+    }
 
-        socket.emit("messageSent",{receiverId,message,createdAt: new Date().toISOString()})
-    })
+    socket.emit("messageSent", {
+        receiverId,
+        message,
+        productId,
+        createdAt: new Date().toISOString()
+    });
+});
+
 
     socket.on("disconnect",() => {
         console.log("User disconnected",socket.id)
@@ -82,6 +82,8 @@ io.on("connection", (socket)=> {
 
 })
 
+
+app.use('/message',messageRouter)
 
 const PORT = process.env.PORT
 server.listen(PORT,()=>console.log(`Server running on port ${PORT} sucessfully`))
