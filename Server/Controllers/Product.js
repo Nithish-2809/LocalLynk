@@ -1,15 +1,20 @@
 const Product = require("../Models/Product")
 
 const addProduct = async (req, res) => {
-  const { productName, price, age, image, description, category, location } = req.body;
-
-  if (!productName || !price || !age || !image || !description) {
-    return res.status(400).json({
-      msg: "All these fields are required!!",
-    });
-  }
-
   try {
+    const { productName, price, age, description, category, location } = req.body;
+
+    if (!productName || !price || !age || !description) {
+      return res.status(400).json({ msg: "All fields are required" });
+    }
+
+    
+    const image = req.file?.path; 
+
+    if (!image) {
+      return res.status(400).json({ msg: "Product image is required!" });
+    }
+
     const productLocation = {
       type: "Point",
       coordinates: location?.coordinates || [0, 0],
@@ -17,36 +22,30 @@ const addProduct = async (req, res) => {
       city: location?.city || "",
     };
 
-    const newProduct = await Product.create({
+    const product = await Product.create({
       productName,
       price,
       age,
-      image,
       description,
       category,
-      Seller: req.user._id, 
-      location: productLocation, 
+      image,
+      Seller: req.user._id,
+      location: productLocation,
     });
 
-    res.status(201).json({
-      msg: "Product added successfully for sale!!",
-      product: {
-        id: newProduct._id,
-        productName: newProduct.productName,
-        price: newProduct.price,
-        age: newProduct.age,
-        category: newProduct.category,
-        description: newProduct.description,
-        location: newProduct.location,
-      },
+    return res.status(201).json({
+      msg: "Product added successfully!",
+      product,
     });
-  } catch (err) {
-    res.status(500).json({
-      msg: "Failed to add new product!!",
-      error: err.message,
+
+  } catch (error) {
+    return res.status(500).json({
+      msg: "Failed to add product",
+      error: error.message,
     });
   }
 };
+
 
 
 const getAllProducts = async (req, res) => {
@@ -99,38 +98,45 @@ const getProductById = async (req, res) => {
 
 const updateProduct = async (req, res) => {
   try {
-    const updates = req.body;
     const { id } = req.params;
 
-    // Check if body is empty
-    if (!Object.keys(updates).length) {
-      return res.status(400).json({ msg: "No details provided to update!" });
-    }
-
-    // Find the product first
+    // Find product first
     const product = await Product.findById(id);
     if (!product) {
       return res.status(404).json({ msg: "Product not found!" });
     }
 
-    // Authorization check — only the seller can update
+    // Authorization check — only seller can update
     if (product.Seller.toString() !== req.user._id.toString()) {
       return res.status(403).json({ msg: "Not authorized to edit this product!" });
     }
-    // Update product
+
+    // If image changed
+    if (req.file) {
+      req.body.image = req.file.path;  // Cloudinary URL
+    }
+
+    // Prevent empty updates
+    if (!Object.keys(req.body).length) {
+      return res.status(400).json({ msg: "No updates provided!" });
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      updates,
+      req.body,
       { new: true, runValidators: true }
     );
 
-    res.status(200).json({
-      msg: "Product edited successfully!",
-      updatedProduct,
+    return res.status(200).json({
+      msg: "Product updated successfully!",
+      updatedProduct
     });
 
   } catch (error) {
-    res.status(500).json({ msg: "Error updating product", error: error.message });
+    return res.status(500).json({
+      msg: "Error updating product",
+      error: error.message
+    });
   }
 };
 
