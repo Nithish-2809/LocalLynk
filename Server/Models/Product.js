@@ -33,6 +33,11 @@ const productSchema = new mongoose.Schema({
         ref : "user",
         required : true
     },
+    status: {
+        type: String,
+        enum: ["available", "sold"],
+        default: "available",
+    },
     location: {
       type: {
         type: String,

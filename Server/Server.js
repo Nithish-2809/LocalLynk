@@ -11,6 +11,7 @@ const { Server } = require("socket.io");
 const ConnectToDataBase = require("./Connect")
 const productRouter = require("./Routes/Product")
 const messageRouter = require("./Routes/Message")
+const orderRouter = require("./Routes/Order")
 const DATABASE_URL = process.env.DATABASE_URL;
 const io = new Server(server, {
     cors: {
@@ -84,6 +85,7 @@ io.on("connection", (socket)=> {
 
 
 app.use('/message',messageRouter)
+app.use('/order',orderRouter)
 
 const PORT = process.env.PORT
 server.listen(PORT,()=>console.log(`Server running on port ${PORT} sucessfully`))
