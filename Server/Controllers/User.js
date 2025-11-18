@@ -45,7 +45,6 @@ const loginController = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Login Error:", error);
     res.status(500).json({ msg: "Server error", error: error.message });
   }
 };
@@ -94,7 +93,6 @@ const signupController = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Signup Error:", error);
     res.status(500).json({ msg: "Server error", error: error.message });
   }
 };

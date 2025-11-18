@@ -14,7 +14,6 @@ const restrictToLoggedinUserOnly = async (req, res, next) => {
 
       next(); 
     } catch (error) {
-      console.error("Authorization error:", error);
       return res.status(401).json({ msg: "Invalid or expired token!" });
     }
   }

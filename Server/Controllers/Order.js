@@ -55,7 +55,6 @@ const buyProduct = async (req, res) => {
 };
 
 
-
 const getMyOrders = async (req, res) => {
   try {
     const userId = req.user._id;

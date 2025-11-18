@@ -39,12 +39,9 @@ app.use('/product',productRouter)
 const onlineUsers = new Map(); 
 
 io.on("connection", (socket)=> {
-    console.log("User connected:", socket.id);
-
     
     socket.on("addUser", (userId) => {
         onlineUsers.set(userId, socket.id);
-        console.log("User added:", userId, "->", socket.id);
     })
 
     socket.on("sendMessage", ({ senderId, receiverId, message, productId }) => {
@@ -70,8 +67,7 @@ io.on("connection", (socket)=> {
 
 
     socket.on("disconnect",() => {
-        console.log("User disconnected",socket.id)
-
+        
         for(let [uId,sId] of onlineUsers.entries()) {
             if(socket.id==sId) {
                 onlineUsers.delete(uId)
