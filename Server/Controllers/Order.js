@@ -5,16 +5,16 @@ const mongoose = require("mongoose");
 const buyProduct = async (req, res) => {
   try {
     const buyerId = req.user._id;
-    const { productId } = req.params;
+    const { productid } = req.params;
 
 
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
+    if (!mongoose.Types.ObjectId.isValid(productid)) {
       return res.status(400).json({ msg: "Invalid product id" });
     }
 
 
     const product = await Product.findOneAndUpdate(
-      { _id: productId, status: "available" },   
+      { _id: productid, status: "available" },   
       { $set: { status: "sold" } },              
       { new: true }
     );
@@ -27,7 +27,7 @@ const buyProduct = async (req, res) => {
     
     if (product.Seller.toString() === buyerId.toString()) {
       
-      await Product.findByIdAndUpdate(productId, { status: "available" });
+      await Product.findByIdAndUpdate(productid, { status: "available" });
       return res.status(403).json({ msg: "You cannot buy your own product!" });
     }
 
