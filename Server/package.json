@@ -19,7 +19,7 @@
     "mongodb": "^7.0.0",
     "mongoose": "^8.19.3",
     "multer": "^2.0.2",
-    "multer-storage-cloudinary": "^4.0.0",
+    "multer-storage-cloudinary": "3.0.0",
     "nodemon": "^3.1.10",
     "socket.io": "^4.8.1"
   }
