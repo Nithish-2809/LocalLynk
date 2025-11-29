@@ -17,22 +17,13 @@ const orderRouter = require("./Routes/Order");
 const DATABASE_URL = process.env.DATABASE_URL;
 
 // ========== ENABLE CORS ==========
-app.use(
-  cors({
-    origin: [
-      "*"                          
-    ],
-    methods: "GET,POST,PUT,DELETE",
-    credentials: true,
-  })
-);
+app.use(cors()); 
+
 
 // ========== SOCKET.IO CORS ==========
 const io = new Server(server, {
   cors: {
-    origin: [
-      "*"
-    ],
+   origin: true,
     methods: ["GET","POST","PATCH","DELETE"]
   }
 });
