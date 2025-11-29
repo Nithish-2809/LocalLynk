@@ -51,8 +51,19 @@ const loginController = async (req, res) => {
 
 const signupController = async (req, res) => {
   try {
-    const { userName, email, password, profilePic, location } = req.body;
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
 
+    const { userName, email, password } = req.body;
+
+    // ✅ Parse location JSON
+    let location = null;
+    if (req.body.location) {
+      location = JSON.parse(req.body.location);
+    }
+
+    // ✅ File from multer
+    const profilePic = req.file ? req.file.path : "";
 
     if (!userName || !email || !password) {
       return res.status(400).json({ msg: "All fields are required!" });
@@ -60,7 +71,7 @@ const signupController = async (req, res) => {
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ msg: "Email already taken. Please use another one." });
+      return res.status(400).json({ msg: "Email already taken!" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -70,32 +81,27 @@ const signupController = async (req, res) => {
       coordinates: location?.coordinates || [0, 0],
       address: location?.address || "",
       city: location?.city || "",
-    }
+    };
 
-    // 5️⃣ Create user
     const newUser = await User.create({
       userName,
       email,
       password: hashedPassword,
-      profilePic: profilePic || "",
+      profilePic,
       location: userLocation,
     });
 
-    // 6️⃣ Response
     res.status(201).json({
-      msg: "User created successfully!",
-      user: {
-        id: newUser._id,
-        userName: newUser.userName,
-        email: newUser.email,
-        profilePic: newUser.profilePic,
-        location: newUser.location,
-      },
+      msg: "Signup successful ✅",
+      user: newUser,
     });
+
   } catch (error) {
-    res.status(500).json({ msg: "Server error", error: error.message });
+    console.error("SIGNUP ERROR:", error.message);
+    res.status(500).json({ msg: error.message });
   }
 };
+
 
 const getProductsByUser = async (req, res) => {
   try {
