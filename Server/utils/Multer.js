@@ -1,8 +1,8 @@
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
-// ✅ IMPORT v2 DIRECTLY (THIS FIXES uploader undefined)
-const cloudinary = require("cloudinary").v2;
+
+const cloudinary = require("./cloudinaryU")
 
 const storage = new CloudinaryStorage({
   cloudinary,
