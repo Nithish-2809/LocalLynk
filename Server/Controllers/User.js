@@ -138,52 +138,46 @@ const updateProfile = async (req, res) => {
   try {
     const userId = req.params.userId;
 
-    // ========================
-    // SECURITY CHECK
-    // ========================
-    if (!req.user || req.user._id.toString() !== userId) {
-      return res.status(403).json({ msg: "Not authorized to update this profile" });
-    }
-
-    // ========================
-    // PARSE LOCATION IF SENT
-    // ========================
+    // --------------------------
+    // 1. Parse location if sent
+    // --------------------------
     let location = null;
     if (req.body.location) {
       try {
         location = JSON.parse(req.body.location);
-      } catch (err) {
+      } catch {
         return res.status(400).json({ msg: "Invalid location format" });
       }
     }
 
-    // ========================
-    // HANDLE PROFILE PIC
-    // ========================
-    let profilePic = null;
-
-    // If multer uploaded a new file
-    if (req.file) {
-      profilePic = req.file.path;
-    }
-
-    // If front-end sends a Google profilePic URL
-    if (req.body.profilePic && !req.file) {
-      profilePic = req.body.profilePic;
-    }
-
-    // ========================
-    // BUILD UPDATE OBJECT
-    // ========================
+    // --------------------------
+    // 2. Prepare update object
+    // --------------------------
     const updateData = {};
 
     if (req.body.userName) updateData.userName = req.body.userName;
     if (req.body.email) updateData.email = req.body.email;
-    if (req.body.address) updateData["location.address"] = req.body.address;
-    if (req.body.city) updateData["location.city"] = req.body.city;
+    if (req.body.address) updateData.address = req.body.address;
+    if (req.body.city) updateData.city = req.body.city;
 
-    if (profilePic) updateData.profilePic = profilePic;
+    // --------------------------
+    // 3. If new profilePic uploaded
+    // --------------------------
+    if (req.file) {
+      updateData.profilePic = req.file.path; // cloudinary URL
+    }
 
+    // --------------------------
+    // 4. If removePic=true
+    // --------------------------
+    if (req.body.removePic === "true") {
+      updateData.profilePic =
+        "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+    }
+
+    // --------------------------
+    // 5. If location updated
+    // --------------------------
     if (location) {
       updateData.location = {
         type: "Point",
@@ -193,14 +187,18 @@ const updateProfile = async (req, res) => {
       };
     }
 
-    // ========================
-    // UPDATE USER IN DB
-    // ========================
+    // --------------------------
+    // 6. Save to DB
+    // --------------------------
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $set: updateData },
       { new: true }
     );
+
+    if (!updatedUser) {
+      return res.status(404).json({ msg: "User not found!" });
+    }
 
     return res.status(200).json({
       msg: "Profile updated successfully ✅",
@@ -209,9 +207,10 @@ const updateProfile = async (req, res) => {
 
   } catch (error) {
     console.error("PROFILE UPDATE ERROR:", error.message);
-    res.status(500).json({ msg: error.message });
+    return res.status(500).json({ msg: error.message });
   }
 };
+
 
 
 
