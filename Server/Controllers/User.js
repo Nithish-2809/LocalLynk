@@ -126,6 +126,58 @@ const getProductsByUser = async (req, res) => {
 };
 
 
-module.exports = { signupController,loginController,getProductsByUser };
+const updateProfile = async (req, res) => {
+  try {
+
+    const userId = req.params.id;
+
+    // Parse location JSON only if the client sends it
+    let location = null;
+    if (req.body.location) {
+      location = JSON.parse(req.body.location);
+    }
+
+    // If an image is uploaded
+    const profilePic = req.file ? req.file.path : null;
+
+    // Build update object
+    const updateData = {
+      ...req.body, // directly spread req.body (like userName, email)
+    };
+
+    if (profilePic) {
+      updateData.profilePic = profilePic;
+    }
+
+    if (location) {
+      updateData.location = {
+        type: "Point",
+        coordinates: location.coordinates,
+        address: location.address,
+        city: location.city,
+      };
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateData }, // partial update
+      { new: true }
+    );
+
+    res.status(200).json({
+      msg: "Profile updated successfully ✅",
+      user: updatedUser,
+    });
+
+  } catch (error) {
+    console.error("PROFILE UPDATE ERROR:", error.message);
+    res.status(500).json({ msg: error.message });
+  }
+};
+
+
+
+
+module.exports = { signupController,loginController,getProductsByUser,updateProfile };
 
 

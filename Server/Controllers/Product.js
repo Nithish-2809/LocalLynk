@@ -115,7 +115,7 @@ const updateProduct = async (req, res) => {
     if (req.file) {
       req.body.image = req.file.path;  // Cloudinary URL
     }
-
+  
     // Prevent empty updates
     if (!Object.keys(req.body).length) {
       return res.status(400).json({ msg: "No updates provided!" });
