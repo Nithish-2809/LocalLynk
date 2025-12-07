@@ -133,7 +133,6 @@ const getProductsByUser = async (req, res) => {
 
 
 
-
 const updateProfile = async (req, res) => {
   try {
     const userId = req.params.userId;
