@@ -54,16 +54,21 @@ const signupController = async (req, res) => {
     console.log("BODY:", req.body);
     console.log("FILE:", req.file);
 
-    const { userName, email, password } = req.body;
+    const { userName, email, password, googlePic } = req.body;
 
-    // ✅ Parse location JSON
+    // Parse location JSON
     let location = null;
     if (req.body.location) {
       location = JSON.parse(req.body.location);
     }
 
-    // ✅ File from multer
-    const profilePic = req.file ? req.file.path : "";
+    // If file uploaded use Cloudinary; else use googlePic URL
+    let profilePic = "";
+    if (req.file) {
+      profilePic = req.file.path; 
+    } else if (googlePic) {
+      profilePic = googlePic; // <=== GOOGLE PIC SAVED HERE
+    }
 
     if (!userName || !email || !password) {
       return res.status(400).json({ msg: "All fields are required!" });
@@ -101,6 +106,7 @@ const signupController = async (req, res) => {
     res.status(500).json({ msg: error.message });
   }
 };
+
 
 
 const getProductsByUser = async (req, res) => {
