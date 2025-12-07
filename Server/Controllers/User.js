@@ -132,28 +132,57 @@ const getProductsByUser = async (req, res) => {
 };
 
 
+
+
 const updateProfile = async (req, res) => {
   try {
-
     const userId = req.params.userId;
 
-    // Parse location JSON only if the client sends it
+    // ========================
+    // SECURITY CHECK
+    // ========================
+    if (!req.user || req.user._id.toString() !== userId) {
+      return res.status(403).json({ msg: "Not authorized to update this profile" });
+    }
+
+    // ========================
+    // PARSE LOCATION IF SENT
+    // ========================
     let location = null;
     if (req.body.location) {
-      location = JSON.parse(req.body.location);
+      try {
+        location = JSON.parse(req.body.location);
+      } catch (err) {
+        return res.status(400).json({ msg: "Invalid location format" });
+      }
     }
 
-    // If an image is uploaded
-    const profilePic = req.file ? req.file.path : null;
+    // ========================
+    // HANDLE PROFILE PIC
+    // ========================
+    let profilePic = null;
 
-    // Build update object
-    const updateData = {
-      ...req.body, // directly spread req.body (like userName, email)
-    };
-
-    if (profilePic) {
-      updateData.profilePic = profilePic;
+    // If multer uploaded a new file
+    if (req.file) {
+      profilePic = req.file.path;
     }
+
+    // If front-end sends a Google profilePic URL
+    if (req.body.profilePic && !req.file) {
+      profilePic = req.body.profilePic;
+    }
+
+    // ========================
+    // BUILD UPDATE OBJECT
+    // ========================
+    const updateData = {};
+
+    if (req.body.userName) updateData.userName = req.body.userName;
+    if (req.body.email) updateData.email = req.body.email;
+    if (req.body.address) updateData["location.address"] = req.body.address;
+    if (req.body.city) updateData["location.city"] = req.body.city;
+
+    if (profilePic) updateData.profilePic = profilePic;
 
     if (location) {
       updateData.location = {
@@ -164,13 +193,16 @@ const updateProfile = async (req, res) => {
       };
     }
 
+    // ========================
+    // UPDATE USER IN DB
+    // ========================
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { $set: updateData }, // partial update
+      { $set: updateData },
       { new: true }
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       msg: "Profile updated successfully ✅",
       user: updatedUser,
     });
