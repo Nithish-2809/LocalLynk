@@ -129,7 +129,7 @@ const getProductsByUser = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
 
-    const userId = req.params.id;
+    const userId = req.params.userId;
 
     // Parse location JSON only if the client sends it
     let location = null;
