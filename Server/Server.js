@@ -19,7 +19,7 @@ const DATABASE_URL = process.env.DATABASE_URL;
 // ========== ENABLE CORS ==========
 app.use(cors({
   origin: ["http://localhost:5174", "http://localhost:5173"],
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST","PATCH", "PUT", "DELETE"],
   credentials: false
 }));
 
