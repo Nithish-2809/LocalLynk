@@ -128,6 +128,33 @@ app.get("/admin/fix-sellers", async (req, res) => {
   }
 });
 
+
+// REAL FIX: convert Seller from String → ObjectId
+
+app.get("/admin/fix-sellers-2", async (req, res) => {
+  try {
+    const products = await Product.find();
+    let fixed = 0;
+
+    for (const p of products) {
+      if (typeof p.Seller === "string") {
+        p.Seller = new mongoose.Types.ObjectId(p.Seller);  // REAL CONVERSION
+        await p.save();
+        fixed++;
+      }
+    }
+
+    return res.json({
+      msg: "Seller type conversion completed!",
+      totalProducts: products.length,
+      converted: fixed,
+    });
+  } catch (err) {
+    return res.status(500).json({ msg: "Fix failed", error: err.message });
+  }
+});
+
+
 // =====================================
 // SERVER START
 // =====================================
