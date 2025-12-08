@@ -1,6 +1,7 @@
 const User = require("../Models/User")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
+const mongoose = require("mongoose");
 const dotenv = require("dotenv")
 dotenv.config()
 
@@ -113,9 +114,14 @@ const getProductsByUser = async (req, res) => {
   try {
     const { userId } = req.params;
 
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ msg: "Invalid user ID" });
+    }
+
     const products = await Product.find({ Seller: userId })
       .sort({ createdAt: -1 })
-      .populate("Seller", "userName email");
+      .populate("Seller", "userName email profilePic location createdAt _id");
 
     res.status(200).json({
       msg: "User's products fetched successfully!",
@@ -130,6 +136,8 @@ const getProductsByUser = async (req, res) => {
     });
   }
 };
+
+
 
 
 
