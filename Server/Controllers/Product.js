@@ -267,8 +267,35 @@ const getMyProducts = async (req, res) => {
 };
 
 
+const getProductsByUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
 
-module.exports = {getAllProducts, getProductById, addProduct,updateProduct,deleteProduct,searchProducts,getNearbyProducts,getMyProducts};
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ msg: "Invalid user ID" });
+    }
+
+    const products = await Product.find({ Seller: userId })
+      .sort({ createdAt: -1 })
+      .populate("Seller", "userName email profilePic location createdAt _id");
+
+    res.status(200).json({
+      msg: "User's products fetched successfully!",
+      total: products.length,
+      products,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      msg: "Error fetching user's products",
+      error: error.message,
+    });
+  }
+};
+
+
+module.exports = {getAllProducts, getProductById, addProduct,updateProduct,deleteProduct,searchProducts,getNearbyProducts,getMyProducts,getProductsByUser};
 
 
 

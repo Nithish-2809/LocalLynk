@@ -110,32 +110,7 @@ const signupController = async (req, res) => {
 
 
 
-const getProductsByUser = async (req, res) => {
-  try {
-    const { userId } = req.params;
 
-    // Validate ObjectId
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ msg: "Invalid user ID" });
-    }
-
-    const products = await Product.find({ Seller: userId })
-      .sort({ createdAt: -1 })
-      .populate("Seller", "userName email profilePic location createdAt _id");
-
-    res.status(200).json({
-      msg: "User's products fetched successfully!",
-      total: products.length,
-      products,
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      msg: "Error fetching user's products",
-      error: error.message,
-    });
-  }
-};
 
 
 
@@ -222,6 +197,6 @@ const updateProfile = async (req, res) => {
 
 
 
-module.exports = { signupController,loginController,getProductsByUser,updateProfile };
+module.exports = { signupController,loginController,updateProfile };
 
 

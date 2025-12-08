@@ -7,7 +7,8 @@ const {
   deleteProduct,
   searchProducts,
   getNearbyProducts,
-  getMyProducts
+  getMyProducts,
+  getProductsByUser
 } = require("../Controllers/Product");
 const { restrictToLoggedinUserOnly } = require("../Middlewares/Auth");
 const upload = require("../utils/Multer");
@@ -21,6 +22,7 @@ productRouter
   .get("/my-products", restrictToLoggedinUserOnly, getMyProducts)
   .get("/search", searchProducts)
   .get("/:id", getProductById)
+  .get("/seller/:userId", getProductsByUser)
   .patch("/:id", restrictToLoggedinUserOnly, upload.single("image"), updateProduct)
   .delete("/:id", restrictToLoggedinUserOnly, deleteProduct);
 
