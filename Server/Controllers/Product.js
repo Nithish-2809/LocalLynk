@@ -74,10 +74,8 @@ const getProductById = async (req, res) => {
       return res.status(400).json({ msg: "Invalid product id" });
     }
   try {
-    const product = await Product.findById(req.params.id).populate(
-      "Seller",
-      "userName email"
-    );
+    const product = await Product.findById(req.params.id).populate("Seller")
+
 
     if (!product) {
       return res.status(404).json({ msg: "Product not found!" });
