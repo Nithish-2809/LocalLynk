@@ -4,7 +4,7 @@ const mongoose = require("mongoose")
 
 const addProduct = async (req, res) => {
   try {
-    const { productName, price, age, description, category, location } = req.body;
+    const { productName, price, age, description, category } = req.body;
 
     if (!productName || !price || !age || !description) {
       return res.status(400).json({ msg: "All fields are required" });
@@ -13,6 +13,16 @@ const addProduct = async (req, res) => {
     const image = req.file?.path;
     if (!image) {
       return res.status(400).json({ msg: "Product image is required!" });
+    }
+
+    // ⭐ FIX: Parse location JSON STRING
+    let location = null;
+    if (req.body.location) {
+      try {
+        location = JSON.parse(req.body.location);
+      } catch (err) {
+        return res.status(400).json({ msg: "Invalid location format" });
+      }
     }
 
     const productLocation = {
@@ -29,7 +39,7 @@ const addProduct = async (req, res) => {
       description,
       category,
       image,
-      Seller: new mongoose.Types.ObjectId(req.user._id),  // 🔥 FIX
+      Seller: new mongoose.Types.ObjectId(req.user._id), // FIX seller
       location: productLocation,
     });
 
@@ -45,7 +55,6 @@ const addProduct = async (req, res) => {
     });
   }
 };
-
 
 
 const getAllProducts = async (req, res) => {
