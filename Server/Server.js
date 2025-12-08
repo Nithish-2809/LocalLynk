@@ -96,6 +96,37 @@ io.on("connection", (socket) => {
   });
 });
 
+
+
+
+app.get("/admin/fix-sellers", async (req, res) => {
+  try {
+    const products = await Product.find();
+    let fixed = 0;
+
+    for (const p of products) {
+      // if Seller is an object instead of ObjectId
+      if (p.Seller && typeof p.Seller === "object" && p.Seller._id) {
+        const correctId = p.Seller._id;
+
+        p.Seller = new mongoose.Types.ObjectId(correctId);
+        await p.save();
+
+        fixed++;
+      }
+    }
+
+    return res.json({
+      msg: "Seller field fix completed successfully!",
+      totalProducts: products.length,
+      fixedProducts: fixed,
+    });
+  } catch (err) {
+    console.error("Fix error:", err);
+    return res.status(500).json({ msg: "Fix failed", error: err.message });
+  }
+});
+
 // =====================================
 // SERVER START
 // =====================================

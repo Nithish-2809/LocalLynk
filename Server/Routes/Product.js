@@ -26,4 +26,5 @@ productRouter
   .patch("/:id", restrictToLoggedinUserOnly, upload.single("image"), updateProduct)
   .delete("/:id", restrictToLoggedinUserOnly, deleteProduct);
 
+
 module.exports = productRouter;

@@ -1,6 +1,7 @@
 const Product = require("../Models/Product")
 const mongoose = require("mongoose")
 
+
 const addProduct = async (req, res) => {
   try {
     const { productName, price, age, description, category, location } = req.body;
@@ -9,9 +10,7 @@ const addProduct = async (req, res) => {
       return res.status(400).json({ msg: "All fields are required" });
     }
 
-    
-    const image = req.file?.path; 
-
+    const image = req.file?.path;
     if (!image) {
       return res.status(400).json({ msg: "Product image is required!" });
     }
@@ -30,7 +29,7 @@ const addProduct = async (req, res) => {
       description,
       category,
       image,
-      Seller: req.user._id,
+      Seller: new mongoose.Types.ObjectId(req.user._id),  // 🔥 FIX
       location: productLocation,
     });
 
