@@ -252,7 +252,11 @@ const getNearbyProducts = async (req, res) => {
 
 const getMyProducts = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user?._id || req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ msg: "User not authenticated" });
+    }
 
     const products = await Product.find({ Seller: userId })
       .sort({ createdAt: -1 })
