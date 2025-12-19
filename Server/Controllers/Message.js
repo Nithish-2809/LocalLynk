@@ -61,7 +61,9 @@ const chatHistory = async (req, res) => {
         { sender: user1, receiver: user2 },
         { sender: user2, receiver: user1 }
       ]
-    }).sort({ createdAt: 1 });
+    })
+    .populate("sender receiver", "userName email profilePic")
+    .sort({ createdAt: 1 });
 
     res.status(200).json({
       msg: "CHAT HISTORY",
@@ -75,4 +77,83 @@ const chatHistory = async (req, res) => {
 };
 
 
-module.exports = { storeMessage,chatHistory };
+const myChats = async (req, res) => {
+  try {
+    const myId = req.user._id;
+
+    const messages = await Message.find({
+      $or: [{ sender: myId }, { receiver: myId }]
+    })
+      .populate("sender receiver", "userName profilePic")
+      .populate("product", "productName")
+      .sort({ updatedAt: -1 });
+
+    const chatMap = new Map();
+
+    for (const msg of messages) {
+      // safety check (important)
+      if (!msg.product) continue;
+
+      const otherUser =
+        msg.sender._id.toString() === myId.toString()
+          ? msg.receiver
+          : msg.sender;
+
+      const key = `${otherUser._id}_${msg.product._id}`;
+
+      if (!chatMap.has(key)) {
+        // ✅ compute unread count PER CHAT
+        const unreadCount = await Message.countDocuments({
+          sender: otherUser._id,
+          receiver: myId,
+          product: msg.product._id,
+          isRead: false
+        });
+
+        chatMap.set(key, {
+          user: otherUser,
+          product: msg.product,
+          lastMessage: msg.message,
+          updatedAt: msg.updatedAt,
+          unreadCount
+        });
+      }
+    }
+
+    res.status(200).json({
+      chats: Array.from(chatMap.values())
+    });
+
+  } catch (error) {
+    console.error("MY CHATS ERROR:", error);
+    res.status(500).json({
+      msg: "Failed to load chats",
+      error: error.message
+    });
+  }
+};
+
+
+const markAsRead = async (req, res) => {
+  try {
+    const myId = req.user._id;
+    const { userId, productId } = req.body;
+
+    await Message.updateMany(
+      {
+        sender: userId,
+        receiver: myId,
+        product: productId,
+        isRead: false
+      },
+      { isRead: true }
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ msg: "Failed to mark read" });
+  }
+};
+
+
+module.exports = { storeMessage,chatHistory,myChats,markAsRead };
