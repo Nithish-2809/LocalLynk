@@ -7,53 +7,47 @@ const buyProduct = async (req, res) => {
     const buyerId = req.user._id;
     const { productid } = req.params;
 
-
     if (!mongoose.Types.ObjectId.isValid(productid)) {
       return res.status(400).json({ msg: "Invalid product id" });
     }
 
+    // 1. Fetch product (DO NOT update status)
+    const product = await Product.findById(productid);
 
-    const product = await Product.findOneAndUpdate(
-      { _id: productid, status: "available" },   
-      { $set: { status: "sold" } },              
-      { new: true }
-    );
-
-    
-    if (!product) {
-      return res.status(409).json({ msg: "Product is already sold or unavailable!" });
+    if (!product || product.status !== "available") {
+      return res
+        .status(409)
+        .json({ msg: "Product already sold or unavailable" });
     }
 
-    
+    // 2. Prevent self-buy
     if (product.Seller.toString() === buyerId.toString()) {
-      
-      await Product.findByIdAndUpdate(productid, { status: "available" });
-      return res.status(403).json({ msg: "You cannot buy your own product!" });
+      return res
+        .status(403)
+        .json({ msg: "You cannot buy your own product!" });
     }
 
-    
+    // 3. Create order (pending)
     const order = await Order.create({
       buyer: buyerId,
       seller: product.Seller,
       product: product._id,
       amount: product.price,
-      status: "pending"
+      status: "pending",
     });
 
     return res.status(201).json({
       success: true,
-      msg: "Order placed successfully!",
-      order
+      msg: "Order created. Proceed to payment.",
+      order,
     });
-
   } catch (error) {
     return res.status(500).json({
       msg: "Order failed",
-      error: error.message
+      error: error.message,
     });
   }
 };
-
 
 const getMyOrders = async (req, res) => {
   try {
@@ -69,7 +63,6 @@ const getMyOrders = async (req, res) => {
       total: orders.length,
       orders,
     });
-
   } catch (error) {
     return res.status(500).json({
       msg: "Failed to fetch your orders",
@@ -78,4 +71,4 @@ const getMyOrders = async (req, res) => {
   }
 };
 
-module.exports = { buyProduct,getMyOrders };
+module.exports = { buyProduct, getMyOrders };

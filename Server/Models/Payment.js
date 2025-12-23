@@ -1,33 +1,33 @@
+// Models/Payment.js
 const mongoose = require("mongoose");
 
-const orderSchema = new mongoose.Schema(
+const paymentSchema = new mongoose.Schema(
   {
+    order: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "order",
+      required: true,
+    },
     buyer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
-      required: true,
-    },
-    seller: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "user",
-      required: true,
-    },
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "product",
       required: true,
     },
     amount: {
       type: Number,
       required: true,
     },
+    stripePaymentIntentId: {
+      type: String,
+      required: true,
+    },
     status: {
       type: String,
-      enum: ["pending", "completed", "cancelled"],
-      default: "pending",
+      enum: ["created", "paid", "failed"],
+      default: "created",
     },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("order", orderSchema);
+module.exports = mongoose.model("payment", paymentSchema);

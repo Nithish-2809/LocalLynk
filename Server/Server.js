@@ -13,7 +13,9 @@ const ConnectToDataBase = require("./Connect");
 const productRouter = require("./Routes/Product");
 const messageRouter = require("./Routes/Message");
 const orderRouter = require("./Routes/Order");
+const paymentRouter = require("./Routes/Payment")
 const mongoose = require("mongoose")
+
 
 const DATABASE_URL = process.env.DATABASE_URL;
 
@@ -58,6 +60,7 @@ app.use("/user", userRouter);
 app.use("/product", productRouter);
 app.use("/message", messageRouter);
 app.use("/order", orderRouter);
+app.use("/payment", paymentRouter)
 
 // =====================================
 // SOCKET.IO REAL TIME SYSTEM
