@@ -3,6 +3,8 @@
 **LocalLynk** is a full-stack local marketplace web application that enables users to buy and sell products within their nearby area. It emphasizes location-aware discovery, secure payments, and real-time interaction between buyers and sellers.
 
 ---
+Live preview
+https://local-lynk.onrender.com
 
 ## 🚀 Features
 
