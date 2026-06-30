@@ -24,13 +24,17 @@ const server = http.createServer(app);
 // ==============================
 const PORT = process.env.PORT || 5000;
 const DATABASE_URL = process.env.DATABASE_URL;
-const CLIENT_URL = process.env.CLIENT_URL || "*";
+
+// Supports one or multiple client URLs separated by commas
+const CLIENT_URLS = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(",").map(url => url.trim())
+  : ["*"];
 
 // ==============================
 // GLOBAL MIDDLEWARE
 // ==============================
 app.use(cors({
-  origin: CLIENT_URL === "*" ? "*" : [CLIENT_URL],
+  origin: CLIENT_URLS.includes("*") ? "*" : CLIENT_URLS,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
@@ -43,7 +47,7 @@ app.use(express.urlencoded({ extended: false }));
 // ==============================
 const io = new Server(server, {
   cors: {
-    origin: CLIENT_URL === "*" ? "*" : [CLIENT_URL],
+    origin: CLIENT_URLS.includes("*") ? "*" : CLIENT_URLS,
     methods: ["GET", "POST"],
   },
 });
@@ -109,7 +113,7 @@ ConnectToDataBase(DATABASE_URL)
   });
 
 // ==============================
-// START SERVER (IMPORTANT FIX)
+// START SERVER
 // ==============================
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
